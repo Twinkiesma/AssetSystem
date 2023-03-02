@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.asset.mapper.ApplyMapper">
+    <resultMap id="AuditVoMap" type="com.example.asset.vo.AuditVo">
+        <result column="assets" property="assets" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+    </resultMap>
+    <select id="findPage" resultType="com.example.asset.vo.AuditVo" resultMap="AuditVoMap">
+        select apply.*, b.name, b.deptname, a.id as au_id, a.result, a.au_name, a.au_date from asset.apply
+        left join (
+            select user.name as au_name, audit.* from asset.user, asset.audit where user.id = audit.au_user_id
+        ) a on (apply.id = a.ap_id)
+        left join (
+            select department.deptname, user.id, user.name from asset.department, asset.user where department.id = user.dept_id
+        ) b on (b.id = apply.user_id)
+        <where>
+            <if test="date != null and date != ''">
+                and apply.date = #{date}
+            </if>
+            <if test="type != null and type != ''">
+                and apply.type = #{type}
+            </if>
+            <if test="name != null and name != ''">
+                and b.name like concat('%', #{name}, '%')
+            </if>
+            <if test="userId != null and userId != ''">
+                and apply.user_id = #{userId}
+            </if>
+            <if test="deptname != null and deptname != ''">
+                and b.deptname like concat('%', #{deptname}, '%')
+            </if>
+            <if test="state != null and state != ''">
+                and apply.state = #{state}
+            </if>
+            <if test="auDate != null and auDate != ''">
+                and a.au_date = #{auDate}
+            </if>
+            <if test="auName != null and auName != ''">
+                and a.au_name like concat('%', #{auName}, '%')
+            </if>
+            <if test="result != null and result != ''">
+                and a.result = #{result}
+            </if>
+        </where>
+    </select>
+</mapper>

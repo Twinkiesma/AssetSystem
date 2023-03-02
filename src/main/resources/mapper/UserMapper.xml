@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.data.mapper.UserMapper">
+    <select id="findPage" resultType="com.example.data.entity.User">
+        select user.*, role.rolename as role, department.deptname as department from asset.user
+        left join asset.role on (user.role_id = role.id)
+        left join asset.department on (user.dept_id = department.id)
+        <where>
+            <if test="username != null and username != ''">
+                and username like concat('%', #{username}, '%')
+            </if>
+            <if test="state != null and state != ''">
+                and user.state = #{state}
+            </if>
+        </where>
+        order by user.id ASC
+    </select>
+    <select id="getUserInfo" resultType="com.example.data.entity.User">
+        select user.*, role.rolename as role, department.deptname as department from asset.user
+        left join asset.role on (user.role_id = role.id)
+        left join asset.department on (user.dept_id = department.id)
+        where user.id = #{userId}
+    </select>
+</mapper>

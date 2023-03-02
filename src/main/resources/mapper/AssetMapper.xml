@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.asset.mapper.AssetMapper">
+    <select id="findPage" resultType="com.example.asset.vo.AssetVo">
+        select asset.*, a.sortname, a.brand, a.model, b.name, b.deptname from asset.asset
+        left join (
+            select specification.*, sort.sortname from asset.specification
+            left join asset.sort on (specification.sort_id = sort.id)
+        )a on (asset.spec_id = a.spec_id)
+        left join (
+            select user.*, department.deptname from asset.user
+            left join asset.department on (user.dept_id = department.id)
+        )b on (asset.user_id = b.id)
+        <where>
+            <if test="sortname != null and sortname != ''">
+                and a.sortname like concat('%', #{sortname}, '%')
+            </if>
+            <if test="brand != null and brand != ''">
+                and a.brand like concat('%', #{brand}, '%')
+            </if>
+            <if test="state != null and state != ''">
+                and asset.state like concat('%', #{state}, '%')
+            </if>
+            <if test="name != null and name != ''">
+                and b.name like concat('%', #{name}, '%')
+            </if>
+            <if test="position != null and position != ''">
+                and asset.position like concat('%', #{position}, '%')
+            </if>
+            <if test="date != null and date != ''">
+                and asset.date like concat('%', #{date}, '%')
+            </if>
+            <if test="deptname != null and deptname != ''">
+                and b.deptname like concat('%', #{deptname}, '%')
+            </if>
+            <if test="userId != null and userId != ''">
+                and asset.user_id = #{userId}
+            </if>
+            <if test="assetname != null and assetname != ''">
+                and asset.assetname like concat('%', #{assetname}, '%')
+            </if>
+        </where>
+    </select>
+    <select id="findBorrowPage" resultType="com.example.asset.vo.BorrowVo">
+        select asset.assetname, asset.spec_id, a.sortname, a.brand, a.model, b.total, IFNULL(c.stock,0) as stock from asset.asset
+        left join (
+            select specification.*, sort.sortname from asset.specification
+            left join asset.sort on (specification.sort_id = sort.id)
+        )a on (asset.spec_id = a.spec_id)
+        left join (
+            select spec_id, count(spec_id) as total from asset.asset group by spec_id
+        )b on (asset.spec_id = b.spec_id)
+        left join (
+            select spec_id, count(spec_id) as stock from asset.asset where state = '闲置' group by spec_id
+        )c on (asset.spec_id = c.spec_id)
+        <where>
+            <if test="assetname != null and assetname != ''">
+                and asset.assetname like concat('%', #{assetname}, '%')
+            </if>
+            <if test="sortname != null and sortname != ''">
+                and a.sortname like concat('%', #{sortname}, '%')
+            </if>
+            <if test="brand != null and brand != ''">
+                and a.brand like concat('%', #{brand}, '%')
+            </if>
+        </where>
+        group by asset.spec_id
+    </select>
+</mapper>
